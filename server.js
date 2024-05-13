@@ -2,12 +2,12 @@ const express = require ("express")
 const app = express()
 const { MongoClient } = require("mongodb-legacy")
 const ObjectId = require("mongodb-legacy").ObjectId
-
-
-const url = "mongodb+srv://projetodb:projetodb@cluster0.i14o7mp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-const dbClient = new MongoClient(url)
+const dotenv = require("dotenv")
+dotenv.config()
+const url = process.env.DATABASE_URL
+const client = new MongoClient(url)
 //ciria o banco de dados  ↓
-const db = dbClient.db("d-pessoais");
+const db = client.db("d-pessoais");
 //cria uma collection com o nome crud  ↓
  const collection = db.collection('crud')
 
@@ -49,8 +49,6 @@ app.get('/show', (req, res) => {
 }) 
 })
 
-
-
 app.route('/edit/:id')
 .get((req, res)=> {
     var id = req.params.id
@@ -78,4 +76,16 @@ app.route('/edit/:id')
             res.redirect('/show')
             console.log('db atualizado')
         })
+})
+
+app.route('/delete/:id')
+.get((req, res) => {
+    var id = req.params.id
+
+    db.collection('crud').deleteOne({_id: ObjectId(id)},
+    (err, result)=> {
+        if(err) return res.send(500, err)
+            console.log(' do banco foi deletado.')
+        res.redirect('/show')
+    })
 })
